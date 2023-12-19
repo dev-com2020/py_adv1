@@ -1,5 +1,7 @@
 import itertools
 from dataclasses import dataclass
+from zope.interface import Interface, Attribute, implementer
+from zope.interface.verify import verifyObject
 
 
 def rects_collide(rect1, rect2):
@@ -18,11 +20,16 @@ def rects_collide(rect1, rect2):
 
 
 def find_collision(objects):
+    for item in objects:
+        verifyObject(ICollidable, item)
     return [
         (item1, item2)
         for item1, item2 in itertools.combinations(objects, 2)
         if rects_collide(item1.bounding_box, item2.bounding_box)
     ]
+
+class ICollidable(Interface):
+    bounding_box = Attribute("Ramka ograniczająca obiekt")
 
 
 @dataclass
@@ -33,6 +40,7 @@ class Box:
     y2: float
 
 
+@implementer(ICollidable)
 @dataclass
 class Square:
     x: float
@@ -47,7 +55,7 @@ class Square:
             self.x + self.size,
             self.y + self.size)
 
-
+@implementer(ICollidable)
 @dataclass
 class Rect:
     x: float
@@ -63,7 +71,7 @@ class Rect:
             self.x + self.width,
             self.y + self.height)
 
-
+@implementer(ICollidable)
 @dataclass
 class Circle:
     x: float
