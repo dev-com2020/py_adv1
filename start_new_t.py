@@ -1,13 +1,16 @@
-from threading import Thread
+from threading import Thread, Lock
 
 thread_visits = 0
+thread_visits_lock = Lock()
 
 
 def visit_counter():
     global thread_visits
     for i in range(100_000):
-        value = thread_visits
-        thread_visits = value + 1
+        # value = thread_visits
+        # thread_visits = value + 1
+        with thread_visits_lock:
+            thread_visits += 1
 
 
 if __name__ == '__main__':
