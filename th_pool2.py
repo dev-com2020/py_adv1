@@ -15,6 +15,7 @@ def fetch_rates(base):
     rates = response.json()['rates']
 
     rates[base] = 1.0
+    return base, rates
 
 
 def present_result(base, rates):
@@ -48,6 +49,9 @@ def main():
         thread.start()
 
     work_queue.join()
+
+    while threads:
+        threads.pop().join()
 
     while not results_queue.empty():
         present_result(*results_queue.get())
