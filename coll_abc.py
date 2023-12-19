@@ -1,7 +1,6 @@
 import itertools
 from dataclasses import dataclass
-from zope.interface import Interface, Attribute, implementer, invariant
-from zope.interface.verify import verifyObject
+from abc import ABC, abstractmethod
 
 
 def rects_collide(rect1, rect2):
@@ -19,10 +18,18 @@ def rects_collide(rect1, rect2):
     )
 
 
+class ColliderABC(ABC):
+    @abstractmethod
+    @property
+    def bounding_box(self):
+        return
+
+
 def find_collision(objects):
     for item in objects:
-        verifyObject(ICollidable, item)
-        ICollidable.validateInvariants(item)
+        if not isinstance(item, ColliderABC):
+            raise TypeError(f"{item} is not a collider")
+
     return [
         (item1, item2)
         for item1, item2 in itertools.combinations(objects, 2)
@@ -30,19 +37,6 @@ def find_collision(objects):
     ]
 
 
-class IBox(Interface):
-    x1 = Attribute("lower-left x cord")
-    y1 = Attribute("lower-left y cord")
-    x2 = Attribute("upper-right x cord")
-    y2 = Attribute("upper-right y cord")
-
-
-class ICollidable(Interface):
-    bounding_box = Attribute("Ramka ograniczająca obiekt")
-    invariant(lambda self: verifyObject(IBox, self.bounding_box))
-
-
-@implementer(IBox)
 @dataclass
 class Box:
     x1: float
@@ -51,9 +45,8 @@ class Box:
     y2: float
 
 
-@implementer(ICollidable)
 @dataclass
-class Square:
+class Square(ColliderABC):
     x: float
     y: float
     size: float
@@ -67,9 +60,8 @@ class Square:
             self.y + self.size)
 
 
-@implementer(ICollidable)
 @dataclass
-class Rect:
+class Rect(ColliderABC):
     x: float
     y: float
     width: float
@@ -84,9 +76,8 @@ class Rect:
             self.y + self.height)
 
 
-@implementer(ICollidable)
 @dataclass
-class Circle:
+class Circle(ColliderABC):
     x: float
     y: float
     radius: float
@@ -99,15 +90,11 @@ class Circle:
             self.x + self.radius,
             self.y + self.radius)
 
-@implementer(ICollidable)
+
 @dataclass
 class Point:
     x: float
     y: float
-
-    @property
-    def bounding_box(self):
-        return self
 
 
 for col in find_collision([
