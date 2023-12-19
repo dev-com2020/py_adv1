@@ -85,4 +85,4 @@ for col in find_collision([
     Square(15, 20, 5),
     Circle(1, 1, 2)
 ]):
-    print(col)
+    print("Kolizje", col)
